@@ -65,7 +65,9 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'Yelp.pipelines.CsvPipeline': 300,
+    #'Yelp.pipelines.CsvPipeline': 300,
+    'Yelp.pipelines.DefaultValuesPipeline': 200,
+    'Yelp.pipelines.MysqlPipeline': 300
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
