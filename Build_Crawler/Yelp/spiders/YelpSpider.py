@@ -63,7 +63,7 @@ class YelpSpider(scrapy.Spider):
         amenities = re.findall(pattern, place.xpath("//script[@type = 'application/json']/text()")[2].extract())
         for amenity in amenities:
             name = amenity[1].replace(" ", "_").replace("-", "_")
-            amen_list = ["Delivery", "Wi_Fi", "Takes_Reservations", "Parking", "Vegetarian_Options ",
+            amen_list = ["Delivery", "Wi_Fi", "Takes_Reservations", "Parking", "Vegetarian_Options",
                          "Accepts_Credit_Cards", "Accepts_Apple_Pay", "Accepts_Google_Pay", "Take_out"]
             if name in amen_list:
                 item[name] = amenity[0]
