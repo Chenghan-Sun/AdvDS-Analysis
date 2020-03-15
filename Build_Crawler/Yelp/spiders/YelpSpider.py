@@ -12,7 +12,8 @@ class YelpSpider(scrapy.Spider):
             for line in f:
                 cities.append(line.strip())
         url_start = 'https://www.yelp.com/search?'
-        for city in cities[:2]:
+        # crawling the TOP 12 cities in California
+        for city in cities[:1]:  # choose crawling cities one by one
             search = 'restaurants'
             location = city + ', ' + 'CA'
             url = url_start + 'find_desc=' + search + '&find_loc=' + location
@@ -62,7 +63,9 @@ class YelpSpider(scrapy.Spider):
         amenities = re.findall(pattern, place.xpath("//script[@type = 'application/json']/text()")[2].extract())
         for amenity in amenities:
             name = amenity[1].replace(" ", "_").replace("-", "_")
-            if name in ["Health_Score", "Wi_Fi", "Smoking", "Delivery", "Take_out"]:
+            amen_list = ["Delivery", "Wi_Fi", "Takes_Reservations", "Parking", "Vegetarian_Options ",
+                         "Accepts_Credit_Cards", "Accepts_Apple_Pay", "Accepts_Google_Pay", "Take_out"]
+            if name in amen_list:
                 item[name] = amenity[0]
         yield item
 

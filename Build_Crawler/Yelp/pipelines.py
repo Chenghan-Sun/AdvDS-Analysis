@@ -50,13 +50,16 @@ class MysqlPipeline(object):
             self.create_table(table_name)
             return item
         insert_sql = f"""INSERT INTO {table_name} (Name, Address, Category, Price, Rating, Reviews, Mon, Tue, Wed, Thu, 
-                      Fri, Sat, Sun, Health_Score, Wi_Fi, Smoking, Delivery, Take_out) 
-                      VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                      Fri, Sat, Sun, Delivery, Wi_Fi, Takes_Reservations, Parking, Vegetarian_Options, \
+                      Accepts_Credit_Cards, Accepts_Apple_Pay, Accepts_Google_Pay, Take_out) 
+                      VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                       """
         self.cursor.execute(insert_sql, (item['Name'], item['Address'], item['Category'], item['Price'],
                                          item['Rating'], item['Reviews'], item['Mon'], item['Tue'], item['Wed'],
-                                         item['Thu'], item['Fri'], item['Sat'], item['Sun'], item['Health_Score'],
-                                         item['Wi_Fi'], item['Smoking'], item['Delivery'], item['Take_out']))
+                                         item['Thu'], item['Fri'], item['Sat'], item['Sun'], item['Delivery'],
+                                         item['Wi_Fi'], item['Takes_Reservations'], item['Parking'],
+                                         item['Vegetarian_Options'], item['Accepts_Credit_Cards'],
+                                         item['Accepts_Apple_Pay'], item['Accepts_Google_Pay'], item['Take_out']))
         self.conn.commit()
 
     def close_spider(self, spider):
@@ -79,14 +82,15 @@ class MysqlPipeline(object):
               Fri varchar(255),
               Sat varchar(255),
               Sun varchar(255),
-              Health_Score varchar(255),
-              Wi_Fi varchar(255),
-              Smoking varchar(255),
               Delivery varchar(255),
+              Wi_Fi varchar(255),
+              Takes_Reservations varchar(255),
+              Parking varchar(255),
+              Vegetarian_Options varchar(255),
+              Accepts_Credit_Cards varchar(255),
+              Accepts_Apple_Pay varchar(255),
+              Accepts_Google_Pay varchar(255),
               Take_out varchar(255)
               )"""
         self.cursor.execute(sql)
         self.conn.commit()
-
-
-
