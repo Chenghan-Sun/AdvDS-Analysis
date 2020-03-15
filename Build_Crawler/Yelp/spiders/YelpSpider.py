@@ -13,7 +13,7 @@ class YelpSpider(scrapy.Spider):
                 cities.append(line.strip())
         url_start = 'https://www.yelp.com/search?'
         # crawling the TOP 12 cities in California
-        for city in cities[:1]:  # choose crawling cities one by one
+        for city in cities[11:12]:  # choose crawling cities one by one
             search = 'restaurants'
             location = city + ', ' + 'CA'
             url = url_start + 'find_desc=' + search + '&find_loc=' + location

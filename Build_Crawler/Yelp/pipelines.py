@@ -41,7 +41,7 @@ class CsvPipeline(object):
 class MysqlPipeline(object):
 
     def __init__(self):
-        self.conn = pymysql.connect('localhost', 'root', '12345678', 'yelp_db')
+        self.conn = pymysql.connect('localhost', 'root', 'skrskr220', 'yelp_db')
         self.cursor = self.conn.cursor()
 
     def process_item(self, item, spider):
