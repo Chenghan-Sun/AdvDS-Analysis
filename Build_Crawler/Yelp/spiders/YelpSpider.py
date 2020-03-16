@@ -1,10 +1,11 @@
 import scrapy
 import re
-from Yelp.items import YelpItem
+from Yelp.items import YelpItem, ReviewItem
 
 
 class YelpSpider(scrapy.Spider):
     name = "YelpScraper"
+    scrap_reviews = True
 
     def start_requests(self):
         cities = []
@@ -13,19 +14,26 @@ class YelpSpider(scrapy.Spider):
                 cities.append(line.strip())
         url_start = 'https://www.yelp.com/search?'
         # crawling the TOP 12 cities in California
-        for city in cities[11:12]:  # choose crawling cities one by one
+        for city in ["davis"]:  # choose crawling cities one by one
             search = 'restaurants'
             location = city + ', ' + 'CA'
             url = url_start + 'find_desc=' + search + '&find_loc=' + location
             yield scrapy.Request(url, meta={"city": city, "first_page": True}, callback=self.parse)
 
-    def parse(self, response):
+    def parse(self, response, scrap_reviews=scrap_reviews):
         city = response.meta["city"]
         if response.meta["first_page"]:
             item = YelpItem()
             item["City"] = city
             item["Name"] = "table_start"
             yield item
+
+            if scrap_reviews:
+                item = ReviewItem()
+                item["City"] = city
+                item["Restaurant"] = "table_start"
+                yield item
+
         res = scrapy.Selector(response)
         place_urls = res.xpath("//h4/span[text()[contains(., '.')]]/a/@href").extract()
         for place_url in place_urls:
@@ -39,7 +47,7 @@ class YelpSpider(scrapy.Spider):
         except TypeError:
             pass
 
-    def parse2(self, response):
+    def parse2(self, response, scrap_reviews=scrap_reviews):
         place = scrapy.Selector(response)
         item = YelpItem()
         item["City"] = response.meta["city"]
@@ -56,7 +64,7 @@ class YelpSpider(scrapy.Spider):
 
         for i, day in enumerate(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]):
             item[day] = ",".join(place.xpath("//table[contains(@class, 'hours-table')]//tr[{}]/td[1]//p/text()"
-                                             .format(i+1)).extract())
+                                             .format(i + 1)).extract())
 
         pattern = re.compile(
             '"providerUrl":.*?,"label":"(.*?)","attributionText":.*?,"icon":.*?,"title":"(.*?)"')
@@ -69,12 +77,59 @@ class YelpSpider(scrapy.Spider):
                 item[name] = amenity[0]
         yield item
 
-        # item["Phone"] = place.xpath("//div[@class = 'hidden']/div/span[@itemprop = 'telephone']/text()").extract_first() \
-        #     .strip()
-        # item["Highlights"] = place.xpath("//span[contains(@class, 'business-highlight')]/text()").extract()
-        # item["Name"] = place.xpath("//h1/text()").extract_first()
-        # item["Rating"] = place.xpath("//div[contains(@class, 'stars')]/@aria-label").extract_first() \
-        #     .replace(" star rating", "")
-        # item["Reviews"] = place.xpath("//h1/../../div[2]/div[2]/p/text()").extract_first().replace(" reviews", "")
-        # item["Price"] = place.xpath("//h1/../../span[1]/span/text()").extract_first()
-        # item["Category"] = place.xpath("//h1/../../span[2]/span/a/text()").extract()
+        if scrap_reviews:
+            yield scrapy.Request(response.url,
+                                 meta={"city": item["City"],
+                                       "restaurant": item["Name"],
+                                       "avg_rate": item["Rating"]},
+                                 callback=self.parse3, dont_filter=True)
+
+    def parse3(self, response):
+        item = ReviewItem()
+        item["City"] = response.meta["city"]
+        item["Restaurant"] = response.meta["restaurant"]
+        item["Avg_rate"] = response.meta["avg_rate"]
+        place = scrapy.Selector(response)
+        pattern_str1 = (
+            '"comment":{"text":"((?:.(?!"comment":))*?)","language"(?:.(?!"comment":))*?'
+            '"rating":((?:.(?!"comment":))*?),"photosUrl"(?:.(?!"comment":))*?"funny":((?:.(?!"comment":))*?),'
+            '"useful":((?:.(?!"comment":))*?),"cool":((?:.(?!"comment":))*?)},"userFeedback"(?:.(?!"comment":))*?'
+            '"businessOwnerReplies".*?"reviewCount":(.*?),"altText".*?"friendCount":(.*?),"displayLocation":"(.*?)",'
+            '"markupDisplayName":"(.*?)","userUrl".*?"photoCount":(.*?),"link".*?"localizedDate":"(.*?)"}'
+        )
+        pattern_str2 = (
+            '"comment":{"text":"((?:.(?!"text":))*?)","language"(?:.(?!"text":))*?'
+            '"rating":((?:.(?!"text":))*?),"photosUrl"(?:.(?!"text":))*?"funny":((?:.(?!"text":))*?),'
+            '"useful":((?:.(?!"text":))*?),"cool":((?:.(?!"text":))*?)},"userFeedback"(?:.(?!"text":))*?'
+            '"previousReviews":\\[.*?"isUpdated":true.*?"reviewCount":(.*?),"altText".*?"friendCount":(.*?),'
+            '"displayLocation":"(.*?)","markupDisplayName":"(.*?)","userUrl".*?"photoCount":(.*?),'
+            '"link".*?"localizedDate":"(.*?)"}'
+        )
+        pattern1 = re.compile(pattern_str1)
+        pattern2 = re.compile(pattern_str2)
+        html_str = place.xpath("//script[@type = 'application/json']/text()")[2].extract()
+        reviews = re.findall(pattern1, html_str) + re.findall(pattern2, html_str)
+        for review in reviews:
+            item["Content"] = review[0]
+            item["Review_rate"] = review[1]
+            item["Funny"] = review[2]
+            item["Useful"] = review[3]
+            item["Cool"] = review[4]
+            item["Review_Count"] = review[5]
+            item["Friend_Count"] = review[6]
+            item["Location"] = review[7]
+            item["User_name"] = review[8]
+            item["Total_photos"] = review[9]
+            item["Review_time"] = review[10]
+            yield item
+
+        try:
+            next_url = place.xpath("//link[@rel = 'next']/@href").extract_first()
+            yield scrapy.Request(next_url,
+                                 meta={"city": item["City"],
+                                       "restaurant": item["Restaurant"],
+                                       "avg_rate": item["Avg_rate"]},
+                                 callback=self.parse3)
+        except TypeError:
+            pass
+
