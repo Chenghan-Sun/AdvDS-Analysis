@@ -19,17 +19,17 @@
 		6 rows in set (0.00 sec)  
  
 	* `yelp_db_7_12.sql` contains information of the following cities:
- 		+------------------------+
-		| Tables_in_yelp_db_7_12 |
-		+------------------------+
-		| yelp_Anaheim           |
-		| yelp_Bakersfield       |
-		| yelp_Long_Beach        |
-		| yelp_Oakland           |
-		| yelp_Riverside         |
-		| yelp_Santa_Ana         |
-		+------------------------+
-		6 rows in set (0.00 sec)
+ 		|------------------------| 
+		| Tables_in_yelp_db_7_12 |  
+		|------------------------| 
+		| yelp_Anaheim           |  
+		| yelp_Bakersfield       |  
+		| yelp_Long_Beach        |  
+		| yelp_Oakland           |  
+		| yelp_Riverside         |  
+		| yelp_Santa_Ana         |  
+		|------------------------| 
+		6 rows in set (0.00 sec)  
 
 ### Part II:
 * Usage:
