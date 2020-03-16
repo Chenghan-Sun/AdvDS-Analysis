@@ -41,56 +41,19 @@ class CsvPipeline(object):
 class MysqlPipeline(object):
 
     def __init__(self):
-        self.conn = pymysql.connect('localhost', 'root', 'skrskr220', 'yelp_db')
+        self.conn = pymysql.connect('localhost', 'root', '12345678', 'yelp_db')
         self.cursor = self.conn.cursor()
 
     def process_item(self, item, spider):
-        table_name = "yelp_" + item["City"].replace(" ", "_")
-        if item["Name"] == "table_start":
-            self.create_table(table_name)
-            return item
-        insert_sql = f"""INSERT INTO {table_name} (Name, Address, Category, Price, Rating, Reviews, Mon, Tue, Wed, Thu, 
-                      Fri, Sat, Sun, Delivery, Wi_Fi, Takes_Reservations, Parking, Vegetarian_Options, \
-                      Accepts_Credit_Cards, Accepts_Apple_Pay, Accepts_Google_Pay, Take_out) 
-                      VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                      """
-        self.cursor.execute(insert_sql, (item['Name'], item['Address'], item['Category'], item['Price'],
-                                         item['Rating'], item['Reviews'], item['Mon'], item['Tue'], item['Wed'],
-                                         item['Thu'], item['Fri'], item['Sat'], item['Sun'], item['Delivery'],
-                                         item['Wi_Fi'], item['Takes_Reservations'], item['Parking'],
-                                         item['Vegetarian_Options'], item['Accepts_Credit_Cards'],
-                                         item['Accepts_Apple_Pay'], item['Accepts_Google_Pay'], item['Take_out']))
-        self.conn.commit()
+        if item.create_table():
+            self.cursor.execute(item.drop_exist_table_sql())
+            self.cursor.execute(item.create_table_sql())
+            self.conn.commit()
+        else:
+            insert_sql, param = item.get_insert_sql()
+            self.cursor.execute(insert_sql, param)
+            self.conn.commit()
 
     def close_spider(self, spider):
         self.cursor.close()
         self.conn.close()
-
-    def create_table(self, table_name):
-        self.cursor.execute(f"DROP TABLE IF EXISTS {table_name}")
-        sql = f"""CREATE TABLE {table_name}(
-              Name varchar(255),
-              Address varchar(255),
-              Category varchar(255),
-              Price varchar(255),
-              Rating varchar(255),
-              Reviews varchar(255),
-              Mon varchar(255),
-              Tue varchar(255),
-              Wed varchar(255),
-              Thu varchar(255),
-              Fri varchar(255),
-              Sat varchar(255),
-              Sun varchar(255),
-              Delivery varchar(255),
-              Wi_Fi varchar(255),
-              Takes_Reservations varchar(255),
-              Parking varchar(255),
-              Vegetarian_Options varchar(255),
-              Accepts_Credit_Cards varchar(255),
-              Accepts_Apple_Pay varchar(255),
-              Accepts_Google_Pay varchar(255),
-              Take_out varchar(255)
-              )"""
-        self.cursor.execute(sql)
-        self.conn.commit()
