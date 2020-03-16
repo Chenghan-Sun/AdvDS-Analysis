@@ -23,24 +23,6 @@ class YelpDb:
                                     charset=self.charset)
         self.cursor = self.conn.cursor()  # set a cursor object
 
-    def create_yelp_table_1(self, table_name):
-        """ Create table in the yelp_info_db based on properties
-        """
-        self.cursor.execute("DROP TABLE IF EXISTS " + table_name)
-        sql = f"""CREATE TABLE {table_name} (
-              `Address` char(255) DEFAULT NULL,
-              `Amenities` varchar(5000) DEFAULT NULL,
-              `Category` char(255) DEFAULT NULL,
-              `Highlights` char(255) DEFAULT NULL,
-              `Name` char(255) DEFAULT NULL,
-              `Open_hours` varchar(500) DEFAULT NULL,
-              `Phone` char(20) DEFAULT NULL,
-              `Price` char(20) DEFAULT NULL,
-              `Rating` char(20) DEFAULT NULL,
-              `Reviews` char(20) DEFAULT NULL)"""
-        self.cursor.execute(sql)
-        print("Created table Successfully.")
-
     def create_yelp_table(self, table_name):
         """ Create table in the yelp_info_db based on properties
         """
