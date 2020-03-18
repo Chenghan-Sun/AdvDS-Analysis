@@ -14,7 +14,7 @@ class YelpDb:
         """
         self.host = "localhost"
         self.user = "root"
-        self.password = "skrskr220"
+        self.password = "12345678"
         self.db = db_name
         self.charset = 'utf8'
         self.conn = pymysql.connect(host=self.host,
@@ -43,6 +43,15 @@ class YelpDb:
         """ fetch single document
         """
         return self.cursor.fetchone()
+    
+    def import_sql(self, sql_file_path):
+        """import sql file into database
+        """
+        file = open(sql_file_path, encoding="utf8")
+        sqls = " ".join(file.readlines())
+        for sql in sqls.split(";"):
+            self.cursor.execute(sql)
+        self.conn.commit()
 
     def db_to_df(self, table_name):
         """ read dbs into Pandas DataFrame
