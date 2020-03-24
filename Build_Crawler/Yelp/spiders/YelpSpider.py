@@ -8,21 +8,28 @@ class YelpSpider(scrapy.Spider):
     scrap_reviews = True
 
     def start_requests(self):
+        """
+        choose the urls to start from
+        """
         cities = []
         with open("cities_of_CA.csv", "r") as f:
             for line in f:
                 cities.append(line.strip())
         url_start = 'https://www.yelp.com/search?'
         # crawling the TOP 12 cities in California
-        for city in ["davis"]:  # choose crawling cities one by one
+        for city in cities[:12]:  # choose crawling cities
             search = 'restaurants'
             location = city + ', ' + 'CA'
             url = url_start + 'find_desc=' + search + '&find_loc=' + location
             yield scrapy.Request(url, meta={"city": city, "first_page": True}, callback=self.parse)
 
     def parse(self, response, scrap_reviews=scrap_reviews):
+        """
+        parse the search pages, crawl all of the urls of restaurants
+        """
         city = response.meta["city"]
         if response.meta["first_page"]:
+            # yield the item to create table in the database
             item = YelpItem()
             item["City"] = city
             item["Name"] = "table_start"
@@ -48,6 +55,9 @@ class YelpSpider(scrapy.Spider):
             pass
 
     def parse2(self, response, scrap_reviews=scrap_reviews):
+        """
+        parse the restaurant pages, download the required information
+        """
         place = scrapy.Selector(response)
         item = YelpItem()
         item["City"] = response.meta["city"]
@@ -85,6 +95,9 @@ class YelpSpider(scrapy.Spider):
                                  callback=self.parse3, dont_filter=True)
 
     def parse3(self, response):
+        """
+        parse every review page of the restaurant, download all of the reviews
+        """
         item = ReviewItem()
         item["City"] = response.meta["city"]
         item["Restaurant"] = response.meta["restaurant"]

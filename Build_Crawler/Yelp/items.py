@@ -9,6 +9,9 @@ import scrapy
 
 
 class YelpItem(scrapy.Item):
+    """
+    items for each restaurant.
+    """
     Name = scrapy.Field()
     Rating = scrapy.Field()
     Reviews = scrapy.Field()
@@ -39,11 +42,17 @@ class YelpItem(scrapy.Item):
         return self["Name"] == "table_start"
 
     def drop_exist_table_sql(self):
+        """
+        return the sql to drop the table in the database if the table name has been used
+        """
         table_name = "yelp_" + self["City"].replace(" ", "_")
         sql = f"DROP TABLE IF EXISTS {table_name}"
         return sql
 
     def create_table_sql(self):
+        """
+        return the sql to create the table in the database with the given name
+        """
         table_name = "yelp_" + self["City"].replace(" ", "_")
         sql = f"""CREATE TABLE {table_name}(
                       Name varchar(255),
@@ -72,6 +81,9 @@ class YelpItem(scrapy.Item):
         return sql
 
     def get_insert_sql(self):
+        """
+        return the sql to insert the items to the table
+        """
         table_name = "yelp_" + self["City"].replace(" ", "_")
         sql = f"""INSERT INTO {table_name} (Name, Address, Category, Price, Rating, Reviews, Mon, Tue, Wed, Thu, 
                               Fri, Sat, Sun, Delivery, Wi_Fi, Takes_Reservations, Parking, Vegetarian_Options, \
@@ -88,6 +100,9 @@ class YelpItem(scrapy.Item):
 
 
 class ReviewItem(scrapy.Item):
+    """
+    items for each review
+    """
     Restaurant = scrapy.Field()
     City = scrapy.Field()
     Avg_rate = scrapy.Field()
@@ -107,11 +122,17 @@ class ReviewItem(scrapy.Item):
         return self["Restaurant"] == "table_start"
 
     def drop_exist_table_sql(self):
+        """
+        return the sql to drop the table in the database if the table name has been used
+        """
         table_name = "yelp_" + self["City"].replace(" ", "_") + "_reviews"
         sql = f"DROP TABLE IF EXISTS {table_name}"
         return sql
 
     def create_table_sql(self):
+        """
+        return the sql to create the table in the database with the given name
+        """
         table_name = "yelp_" + self["City"].replace(" ", "_") + "_reviews"
         sql = f"""CREATE TABLE {table_name}(
                     Restaurant varchar(255),
@@ -131,6 +152,9 @@ class ReviewItem(scrapy.Item):
         return sql
 
     def get_insert_sql(self):
+        """
+        return the sql to insert the items to the table
+        """
         table_name = "yelp_" + self["City"].replace(" ", "_") + "_reviews"
         sql = f"""INSERT INTO {table_name} (Restaurant,Avg_rate,Review_rate,Review_time,Content,Useful,
                               Funny,Cool,User_name,Location,Friend_Count,Review_Count,Total_photos) 
