@@ -1,4 +1,4 @@
-# Exploratory Yelp Data Analysis -- STA 220 Final Project
+# Exploratory Yelp Data Analysis
 
 ## Group: Yiming Wu, Zhuowei Chen, Chenghan Sun
 
