@@ -1,6 +1,6 @@
 # Exploratory Yelp Data Analysis
 
-## Group: Yiming Wu, Zhuowei Chen, Chenghan Sun
+## Yiming Wu, Zhuowei Chen, Chenghan Sun
 
 ## Project Overview and Motivations
 
